@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminLogin, adminRegister, getUser, logOutUser, userLogin, userRegister } from "../controllers/user.controller.js";
+import { adminLogin, adminRegister, editUser, getUser, logOutUser, userLogin, userRegister } from "../controllers/user.controller.js";
 
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/userauth.middleware.js";
@@ -15,6 +15,7 @@ router.route("/user/logout").get(verifyJWT, logOutUser)
 
 
 router.route("/user").get(verifyJWT, getUser)
+router.route("/user/edituser").get(verifyJWT, editUser)
 // router.route("/user/admin/logout").get(verifyJWT, logOutUser)
 
 

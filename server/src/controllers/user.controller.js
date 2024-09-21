@@ -297,6 +297,63 @@ const logOutUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, "user logout successfully"))
 })
 
+import asyncHandler from 'express-async-handler';
+import { User } from '../models/user.model.js'; // Adjust the import according to your file structure
+import ApiError from '../utils/ApiError.js'; // Adjust the import according to your error handling setup
+import { uploadOnCloudinary } from '../utils/cloudinary.js'; // Function to upload images to Cloudinary
+
+// Controller for editing user details
+const editUser = asyncHandler(async (req, res) => {
+    const userId = req.user._id; 
+    const { userName, email, fullName, phoneNumber } = req.body;
+
+    // Validate required fields
+    if (!userName || !email || !fullName) {
+        throw new ApiError(400, "User name, email, and full name are required");
+    }
+
+    // Check if email or username already exists
+    const existingUser = await User.findOne({ 
+        $or: [{ email }, { userName: userName.toLowerCase() }], 
+        _id: { $ne: userId } // Exclude current user ID from check
+    });
+
+    if (existingUser) {
+        throw new ApiError(400, "Email or username already in use");
+    }
+
+    // Prepare update data
+    const updatedData = {
+        userName: userName.toLowerCase(),
+        email: email.toLowerCase(),
+        fullName,
+        phoneNumber,
+    };
+
+    // Handle image upload if provided
+    if (req.file) {
+        try {
+            const imageOnCloudinary = await uploadOnCloudinary(req.file.path);
+            updatedData.image = imageOnCloudinary.secure_url;
+        } catch (error) {
+            throw new ApiError(500, 'Error uploading image to Cloudinary');
+        }
+    }
+
+    // Update user in the database
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedData, { new: true }).select('-password -refreshToken');
+
+    if (!updatedUser) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res.status(200).json({
+        status: 200,
+        data: updatedUser,
+        message: "User details updated successfully",
+    });
+});
+
 
 const getUser = asyncHandler(async (req, res) => {
     const user = req.user
@@ -308,4 +365,4 @@ const getUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user, "User details fetched successfully"));
 })
 
-export { userRegister, userLogin, refreshAccessToken, logOutUser, adminRegister, adminLogin, getUser }
+export { userRegister, userLogin, refreshAccessToken, logOutUser, adminRegister, adminLogin, getUser, editUser }
