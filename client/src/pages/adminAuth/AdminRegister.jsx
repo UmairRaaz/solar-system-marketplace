@@ -25,9 +25,10 @@ const AdminRegister = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/api/admin/register', formData); // Replace with your API endpoint
+            const response = await axios.post('/api/v1/users/admin/register', formData); 
             setResponseMessage(response.data.message);
             setError(''); // Clear any previous error
+            console.log(response)
         } catch (err) {
             setError(err.response ? err.response.data.message : 'Something went wrong');
             setResponseMessage('');

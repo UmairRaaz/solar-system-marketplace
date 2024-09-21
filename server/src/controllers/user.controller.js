@@ -28,23 +28,33 @@ const generateAccessAndRefereshToken = async (userId) => {
 const userRegister = asyncHandler(async (req, res) => {
     const { role, userName, email, fullName, password } = req.body;
     const validRoles = ['user', 'seller'];
+
+    // 400 - Bad Request if the role is invalid
     if (!validRoles.includes(role)) {
         throw new ApiError(400, "Invalid role");
     }
 
+    // 400 - Bad Request if any field is missing
     if ([userName, role, fullName, email, password].some(field => field?.trim() === "")) {
         throw new ApiError(400, "All fields are required");
     }
 
-    const existingUser = await User.findOne({
-        $or: [{ email }, { userName }]
-    });
+    // Check if email or username is already taken
+    const existingUserByEmail = await User.findOne({ email });
+    const existingUserByUserName = await User.findOne({ userName: userName.toLowerCase() });
 
-    if (existingUser) {
-        throw new ApiError(400, "User already registered");
+    // 409 - Conflict if the email is already taken
+    if (existingUserByEmail) {
+        throw new ApiError(409, "Email is already taken");
+    }
+
+    // 409 - Conflict if the username is already taken
+    if (existingUserByUserName) {
+        throw new ApiError(409, "Username is already taken");
     }
 
     try {
+        // Create new user
         const user = await User.create({
             fullName,
             role,
@@ -53,61 +63,137 @@ const userRegister = asyncHandler(async (req, res) => {
             userName: userName.toLowerCase()
         });
 
+        // Fetch user without password and refreshToken
         const createdUser = await User.findById(user._id).select("-password -refreshToken");
 
+        // 500 - Internal Server Error if user is not properly created
         if (!createdUser) {
             throw new ApiError(500, "User registration failed");
         }
 
-        return res.status(200).json(new ApiResponse(200, createdUser, "User registered successfully"));
+        // 201 - Created when user is successfully registered
+        return res.status(201).json(new ApiResponse(201, createdUser, "User registered successfully"));
     } catch (error) {
-        console.log("error while registrating", error)
+        console.log("error while registering", error);
+        // 500 - Internal Server Error if there was an issue during registration
         throw new ApiError(500, "User registration failed");
     }
 });
+
+const userLogin = asyncHandler(async (req, res) => {
+    const { role, email, userName, password } = req.body;
+    console.log(role, email, userName, password);
+
+    // 400 - Bad Request if email is not provided
+    if (!email) {
+        throw new ApiError(400, "Email is required");
+    }
+
+    // Find user by email or username
+    const user = await User.findOne({
+        $or: [{ email }, { userName }]
+    });
+
+    // 404 - Not Found if user does not exist or the role is invalid
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    // 403 - Forbidden if role is incorrect
+    if (user.role !== role) {
+        throw new ApiError(403, "Invalid role");
+    }
+
+    // Verify password
+    const isPasswordCorrect = await user.isPasswordCorrect(password);
+    
+    // 401 - Unauthorized if password is incorrect
+    if (!isPasswordCorrect) {
+        throw new ApiError(401, "Incorrect password");
+    }
+
+    // Generate access and refresh tokens
+    const { accessToken, refreshToken } = await generateAccessAndRefereshToken(user._id);
+    console.log("accessToken login", "refreshAccessToken login", accessToken, refreshToken);
+
+    // Fetch logged-in user without password and refreshToken
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+
+    // 500 - Internal Server Error if the user cannot be fetched after login
+    if (!loggedInUser) {
+        throw new ApiError(500, "Logged-in user not found");
+    }
+
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production"
+    };
+
+    // 200 - OK if login is successful
+    return res.status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new ApiResponse(200, { user: loggedInUser, refreshToken, accessToken }, "User logged in successfully"));
+});
+
 const adminRegister = asyncHandler(async (req, res) => {
     const { adminSecretKey, userName, email, fullName, password } = req.body;
 
-
+    // 403 - Forbidden if the admin secret key is incorrect
     if (adminSecretKey !== process.env.ADMIN_SECRET_KEY) {
         throw new ApiError(403, "Invalid admin secret key");
     }
 
+    // 400 - Bad Request if any field is missing
     if ([userName, fullName, email, password].some(field => field?.trim() === "")) {
         throw new ApiError(400, "All fields are required");
     }
 
-    const existingAdmin = await User.findOne({
-        $or: [{ email }, { userName }]
-    });
+    // Check if email or username is already taken
+    const existingAdminByEmail = await User.findOne({ email });
+    const existingAdminByUserName = await User.findOne({ userName: userName.toLowerCase() });
 
-    if (existingAdmin) {
-        throw new ApiError(400, "Admin already registered");
+    // 409 - Conflict if the email is already taken
+    if (existingAdminByEmail) {
+        throw new ApiError(409, "Email is already taken");
+    }
+
+    // 409 - Conflict if the username is already taken
+    if (existingAdminByUserName) {
+        throw new ApiError(409, "Username is already taken");
     }
 
     try {
+        // Create the admin user
         const admin = await User.create({
             fullName,
-            role: 'admin', 
+            role: 'admin',  // Role is explicitly 'admin'
             email,
             password,
             userName: userName.toLowerCase()
         });
 
+        // Fetch admin user without password and refreshToken
         const createdAdmin = await User.findById(admin._id).select("-password -refreshToken");
 
+        // 500 - Internal Server Error if admin is not properly created
         if (!createdAdmin) {
             throw new ApiError(500, "Admin registration failed");
         }
 
-        return res.status(200).json(new ApiResponse(200, createdAdmin, "Admin registered successfully"));
+        // 201 - Created when the admin is successfully registered
+        return res.status(201).json(new ApiResponse(201, createdAdmin, "Admin registered successfully"));
     } catch (error) {
+        console.log("Error during admin registration:", error);
+        // 500 - Internal Server Error for registration failures
         throw new ApiError(500, "Admin registration failed");
     }
 });
+
 const adminLogin = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
+    // 400 - Bad Request if email or password is missing
     if (!email || !password) {
         throw new ApiError(400, "Email and password are required");
     }
@@ -115,13 +201,15 @@ const adminLogin = asyncHandler(async (req, res) => {
     // Find the user by email
     const admin = await User.findOne({ email });
 
-    // Check if the user exists and if their role is 'admin'
+    // 403 - Forbidden if the user is not found or is not an admin
     if (!admin || admin.role !== 'admin') {
         throw new ApiError(403, "Access denied, admin only");
     }
 
     // Verify the password
     const isPasswordCorrect = await admin.isPasswordCorrect(password);
+    
+    // 400 - Bad Request if the password is incorrect
     if (!isPasswordCorrect) {
         throw new ApiError(400, "Incorrect password");
     }
@@ -129,9 +217,10 @@ const adminLogin = asyncHandler(async (req, res) => {
     // Generate tokens
     const { accessToken, refreshToken } = await generateAccessAndRefereshToken(admin._id);
 
-    // Exclude sensitive information from the response
+    // Fetch admin without sensitive information
     const loggedInAdmin = await User.findById(admin._id).select("-password -refreshToken");
 
+    // 500 - Internal Server Error if the admin cannot be retrieved after login
     if (!loggedInAdmin) {
         throw new ApiError(500, "Admin login failed");
     }
@@ -141,51 +230,11 @@ const adminLogin = asyncHandler(async (req, res) => {
         secure: process.env.NODE_ENV === "production",
     };
 
-    // Send response with tokens
+    // 200 - OK, Admin successfully logged in
     return res.status(200)
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
         .json(new ApiResponse(200, { user: loggedInAdmin, refreshToken, accessToken }, "Admin logged in successfully"));
-});
-
-
-const userLogin = asyncHandler(async (req, res) => {
-    const { role, email, userName, password } = req.body;
-    console.log(role, email, userName, password)
-    if (!email) {
-        throw new ApiError(400, "Email is required");
-    }
-
-    const user = await User.findOne({
-        $or: [{ email }, { userName }]
-    });
-
-    if (!user || user.role !== role) {
-        throw new ApiError(400, "User not found or invalid role");
-    }
-
-    const isPasswordCorrect = await user.isPasswordCorrect(password);
-    if (!isPasswordCorrect) {
-        throw new ApiError(400, "Incorrect password");
-    }
-
-    const { accessToken, refreshToken } = await generateAccessAndRefereshToken(user._id);
-    console.log("accessToken login", "refreshAccessToken login", accessToken, refreshToken)
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
-
-    if (!loggedInUser) {
-        throw new ApiError(500, "Logged in user not found");
-    }
-
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production"
-    };
-
-    return res.status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
-        .json(new ApiResponse(200, { user: loggedInUser, refreshToken, accessToken }, "User logged in successfully"));
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {

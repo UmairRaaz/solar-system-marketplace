@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const Home = () => {
+const ViewProducts = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true); // For loading state
     const [error, setError] = useState(""); // For error handling
@@ -9,9 +9,9 @@ const Home = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('/api/v1/products/allproducts'); // Adjust API endpoint as needed
-                console.log("response on homepage", response)
-                setProducts(response.data.data); 
+                const response = await axios.get('/api/v1/products/products'); 
+                console.log("response on get seller products", response);
+                setProducts(response.data.data);
             } catch (err) {
                 setError("Failed to fetch products. Please try again later.");
             } finally {
@@ -27,16 +27,16 @@ const Home = () => {
 
     return (
         <div>
-            <h2 className="text-2xl font-bold mb-6">All Products</h2>
+            <h2 className="text-2xl font-bold mb-6">Your Products</h2>
             {error && <p className="text-red-500">{error}</p>} {/* Error message */}
-            <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <ul>
                 {products.length ? (
                     products.map(product => (
                         <li key={product._id} className="mb-4 p-4 border rounded shadow">
                             <img
-                                src={product.images[0]} // Display the first image
+                                src={product.images[0]} 
                                 alt={product.name}
-                                className="mb-2 w-full h-auto rounded"
+                                className="mb-2 w-44 h-auto rounded"
                             />
                             <h3 className="font-bold text-lg">{product.name}</h3>
                             <p className="text-gray-700">{product.description}</p>
@@ -51,4 +51,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default ViewProducts;

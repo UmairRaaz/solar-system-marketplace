@@ -12,6 +12,12 @@ const addProduct = asyncHandler(async (req, res) => {
     }
 
     const { name, price, description, category } = req.body;
+
+    // Validate input fields
+    if (!name || !price || !description || !category) {
+        throw new ApiError(400, "All fields are required.");
+    }
+
     let imageUrl = "";
 
     if (req.file) {
@@ -21,6 +27,8 @@ const addProduct = asyncHandler(async (req, res) => {
         } catch (error) {
             throw new ApiError(500, 'Error uploading image to Cloudinary');
         }
+    } else {
+        throw new ApiError(400, "Image is required.");
     }
 
     const newProduct = await Product.create({
@@ -35,6 +43,7 @@ const addProduct = asyncHandler(async (req, res) => {
     return res.status(201)
         .json(new ApiResponse(201, newProduct, "Product added successfully"));
 });
+
 
 
 // Update an existing product
@@ -81,6 +90,13 @@ const getAllProducts = asyncHandler(async (req, res) => {
     return res.status(200)
         .json(new ApiResponse(200, products, "Products fetched successfully"));
 });
+const getProducts = asyncHandler(async (req, res) => {
+    const user = req.user;
+    const products = await Product.find({ });
+
+    return res.status(200)
+        .json(new ApiResponse(200, products, "Products fetched successfully"));
+});
 
 // Get a single product by ID
 const getProduct = asyncHandler(async (req, res) => {
@@ -95,4 +111,4 @@ const getProduct = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, product, "Product fetched successfully"));
 });
 
-export { addProduct, updateProduct, getAllProducts, getProduct };
+export { addProduct, updateProduct, getAllProducts, getProduct, getProducts };

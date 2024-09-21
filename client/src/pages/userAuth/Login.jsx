@@ -34,17 +34,38 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/api/v1/users/login', formData); // Replace with your API endpoint
-            console.log("Response",response)
-            setResponseMessage(response.data.message);
-            setError(''); // Clear any previous error
-            dispatch(setUser(formData))
-            navigate('/home')
+            // Send login request to the server
+            const response = await axios.post('/api/v1/users/login', formData);
+            console.log("Response", response);
+    
+            if (response.data.success) {
+                dispatch(setUser(response.data.data.user)); 
+                setResponseMessage("Login successful! Redirecting...");
+                setError(""); 
+                navigate('/home');
+            }
         } catch (err) {
-            setError(err.response ? err.response.data.message : 'Something went wrong');
+            if (err.response) {
+                const status = err.response.status;
+                const message = err.response.data.message;
+    
+                if (status === 404) {
+                    setError("Email not found. Please check your email.");
+                } else if (status === 401) {
+                    setError("Incorrect password. Please try again.");
+                } else if (status === 403) {
+                    setError("Access denied. Invalid role.");
+                } else {
+                    setError(message || "Something went wrong. Please try again.");
+                }
+            } else {
+                setError("Network error or server is down. Please try again later.");
+            }
+    
             setResponseMessage('');
         }
     };
+    
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
