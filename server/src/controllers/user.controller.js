@@ -88,7 +88,7 @@ const adminRegister = asyncHandler(async (req, res) => {
     try {
         const admin = await User.create({
             fullName,
-            role: 'admin', // Always assign 'admin' role
+            role: 'admin', 
             email,
             password,
             userName: userName.toLowerCase()

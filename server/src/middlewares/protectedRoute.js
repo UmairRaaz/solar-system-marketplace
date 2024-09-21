@@ -1,4 +1,4 @@
-import { User } from "../models/user.models";
+import { User } from "../models/user.models.js";
 
 const protectRoute = asyncHandler(async (req, res, next) => {
     const token = req.cookies.accessToken;

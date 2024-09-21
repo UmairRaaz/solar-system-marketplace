@@ -18,6 +18,8 @@ app.use(cookieParser())
 import healthCheckRouter from "./routes/healthcheck.route.js";
 import userRouter from "./routes/user.routes.js";
 import productRouter from "./routes/products.routes.js";
+import forumRouter from "./routes/forum.routes.js";
+import commentLike from "./routes/commentLikes.routes.js"
 // import { errorHandler } from "./middlewares/error.middlewares.js";
 
 
@@ -25,6 +27,8 @@ import productRouter from "./routes/products.routes.js";
 app.use("/api/v1/healthCheck", healthCheckRouter)
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/products", productRouter)
+app.use("/api/v1/forum", forumRouter)
+app.use("/api/v1/commentlike", commentLike)
 
 
 // app.use(errorHandler)

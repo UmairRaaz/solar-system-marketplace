@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/apiResponse.js";
 import { Product } from "../models/product.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import fs from "fs"
-// Add a new product
+
 const addProduct = asyncHandler(async (req, res) => {
     const user = req.user;
     if (user.role !== "seller") {
