@@ -16,8 +16,6 @@ const UserProfile = () => {
     axios.get('/api/v1/users/user')
       .then((response) => {
         setUser(response.data.data);
-        console.log("setUser", setUser)
-        // console.log("response.data", response.data.data)
         setLoading(false);
       })
       .catch((err) => {

@@ -10,7 +10,6 @@ const Home = () => {
         const fetchProducts = async () => {
             try {
                 const response = await axios.get('/api/v1/products/allproducts'); // Adjust API endpoint as needed
-                console.log("response on homepage", response)
                 setProducts(response.data.data); 
             } catch (err) {
                 setError("Failed to fetch products. Please try again later.");

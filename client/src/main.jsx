@@ -18,6 +18,7 @@ import ProtectedRoute from './pages/seller-dashobard/ProtectedRoute.jsx';
 import AddProduct from './pages/seller-dashobard/AddProduct.jsx';
 import ViewProducts from './pages/seller-dashobard/ViewProducts.jsx';
 import SellerDashboard from './pages/seller-dashobard/SellerDashboard.jsx';
+import AllForums from './pages/forums/AllForums.jsx';
 
 
 const router = createBrowserRouter(
@@ -36,6 +37,8 @@ const router = createBrowserRouter(
         <Route path='add-product' element={<AddProduct />} />
         <Route path='view-products' element={<ViewProducts />} />
       </Route>
+
+      <Route path='/all-forums' element={<AllForums />} />
     </Route>
   )
 );

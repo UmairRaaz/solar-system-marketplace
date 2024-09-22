@@ -40,7 +40,6 @@ const userSchema = new Schema({
 
 // Hashing the password before saving
 userSchema.pre("save", async function (next) {
-    console.log("Hashing password:", this.password);
     if (!this.isModified("password")) return next();
     
     // Hash the password
@@ -55,7 +54,6 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 
 // Method to generate access token
 userSchema.methods.generateAccessToken = async function () {
-    console.log("Generating access token for:", this._id);
     try {
         const token = await jwt.sign({
             _id: this._id,
@@ -64,7 +62,6 @@ userSchema.methods.generateAccessToken = async function () {
             username: this.userName,
             fullName: this.fullName,
         }, process.env.AccessTokenSecret || 'youraccesstokensecret', { expiresIn: process.env.AccessTokenExpiry || '1h' });
-        // console.log("Generated Access Token:", token);
         return token;
     } catch (err) {
         console.log("Error generating access token:", err);
@@ -72,12 +69,10 @@ userSchema.methods.generateAccessToken = async function () {
 };
 
 userSchema.methods.generateRefreshToken = async function () {
-    console.log("Generating refresh token for:", this._id);
     try {
         const token = await jwt.sign({
             _id: this._id,
         }, process.env.RefreshTokenSecret || 'yourrefreshtokensecret', { expiresIn: process.env.RefreshTokenExpiry || '7d' });
-        // console.log("Generated Refresh Token:", token);
         return token;
     } catch (err) {
         console.log("Error generating refresh token:", err);

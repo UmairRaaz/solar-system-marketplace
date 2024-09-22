@@ -10,7 +10,6 @@ const ViewProducts = () => {
         const fetchProducts = async () => {
             try {
                 const response = await axios.get('/api/v1/products/products'); 
-                console.log("response on get seller products", response);
                 setProducts(response.data.data);
             } catch (err) {
                 setError("Failed to fetch products. Please try again later.");

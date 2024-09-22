@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setUser } from '../../redux/authSlice';
 import axios from 'axios';
+import LogoutButton from './Logout';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +13,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
-  console.log("user on navbar", user)
+ 
   const handleProfile = () => {
     setLogoutOpen(false);
     navigate('/userProfile');
@@ -79,6 +80,9 @@ const Navbar = () => {
                 <Link to="/seller/dashboard" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                   Dashboard
                 </Link>
+                <Link to="/all-forums" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                  Forums
+                </Link>
             
 
                 {user ? (
@@ -95,9 +99,7 @@ const Navbar = () => {
                         <button onClick={handleProfile} className="hover:bg-gray-200 p-2 rounded">
                           View Profile
                         </button>
-                        <button onClick={handleLogout} className="hover:bg-gray-200 p-2 rounded">
-                          Logout
-                        </button>
+                        <LogoutButton/>
                       </div>
                     )}
                   </div>

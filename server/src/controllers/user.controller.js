@@ -12,8 +12,6 @@ const generateAccessAndRefereshToken = async (userId) => {
         }
         const accessToken = await user.generateAccessToken()
         const refreshToken = await user.generateRefreshToken()
-        // console.log("accesstoken", accessToken)
-        // console.log("refreshToken", refreshToken)
         user.refreshToken;
         await user.save({ validateBeforeSave: true })
 
@@ -82,7 +80,6 @@ const userRegister = asyncHandler(async (req, res) => {
 
 const userLogin = asyncHandler(async (req, res) => {
     const { role, email, userName, password } = req.body;
-    console.log(role, email, userName, password);
 
     // 400 - Bad Request if email is not provided
     if (!email) {
@@ -114,7 +111,7 @@ const userLogin = asyncHandler(async (req, res) => {
 
     // Generate access and refresh tokens
     const { accessToken, refreshToken } = await generateAccessAndRefereshToken(user._id);
-    console.log("accessToken login", "refreshAccessToken login", accessToken, refreshToken);
+   
 
     // Fetch logged-in user without password and refreshToken
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
@@ -297,10 +294,7 @@ const logOutUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, "user logout successfully"))
 })
 
-import asyncHandler from 'express-async-handler';
-import { User } from '../models/user.model.js'; // Adjust the import according to your file structure
-import ApiError from '../utils/ApiError.js'; // Adjust the import according to your error handling setup
-import { uploadOnCloudinary } from '../utils/cloudinary.js'; // Function to upload images to Cloudinary
+
 
 // Controller for editing user details
 const editUser = asyncHandler(async (req, res) => {
@@ -357,7 +351,6 @@ const editUser = asyncHandler(async (req, res) => {
 
 const getUser = asyncHandler(async (req, res) => {
     const user = req.user
-    console.log(user)
     if (!user) {
         throw new ApiError(400, "user not found");
     }

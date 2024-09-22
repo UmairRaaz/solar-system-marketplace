@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
 import { useNavigate } from 'react-router-dom';
-
 import { useDispatch } from 'react-redux';
 import { setUser } from "../../redux/authSlice.js"
 
 const Login = () => {
-
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
     // State to hold form data
     const [formData, setFormData] = useState({
         userName: '',
@@ -28,7 +26,7 @@ const Login = () => {
           ...formData,
           [e.target.name]: e.target.value,
         });
-      };
+    };
 
     // Handle form submit
     const handleSubmit = async (e) => {
@@ -36,12 +34,22 @@ const Login = () => {
         try {
             // Send login request to the server
             const response = await axios.post('/api/v1/users/login', formData);
-            console.log("Response", response);
-    
+     
             if (response.data.success) {
-                dispatch(setUser(response.data.data.user)); 
+                const userData = response.data.data.user;
+                const token = response.data.data.accessToken; 
+
+                // Save user to Redux
+                dispatch(setUser(userData)); 
+
+                // Save user data and token to localStorage
+                localStorage.setItem('user', JSON.stringify(userData));
+                localStorage.setItem('token', token);
+
                 setResponseMessage("Login successful! Redirecting...");
-                setError(""); 
+                setError("");
+
+                // Redirect to the home page
                 navigate('/home');
             }
         } catch (err) {
@@ -65,7 +73,6 @@ const Login = () => {
             setResponseMessage('');
         }
     };
-    
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
