@@ -8,7 +8,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const verifyJWT = asyncHandler(async (req, _, next) => {
 
     const token = await req.cookies.accessToken 
-
+ 
 
     if (!token) {
         throw new ApiError(400, "Token not found");

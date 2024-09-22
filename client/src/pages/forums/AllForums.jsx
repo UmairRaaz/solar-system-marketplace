@@ -8,12 +8,14 @@ const AllForums = () => {
   const [loading, setLoading] = useState(true);
   const user = useSelector((state) => state.auth.user); // Get user from Redux state
 
-  useEffect(() => {
+  useEffect(() => { 
     const fetchPosts = async () => {
       try {
         const response = await fetch('/api/v1/forums/all'); 
+        
         const data = await response.json();
-        setPosts(data);
+        console.log(data)
+        setPosts(data.data);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching posts:', error);
@@ -30,12 +32,12 @@ const AllForums = () => {
 
   return (
     <div className='max-w-4xl mx-auto'>
-      <AddForums /> {/* Add the AddForums component here */}
+      <AddForums /> 
       {posts.length > 0 ? (
         posts.map((post) => (
           <div key={post._id} className="forum-post">
             <h3>{post.content}</h3>
-            <p>Posted by: {post.uploadByUserId.name}</p>
+            <p>Posted by: {post.uploadByUserId.fullName}</p>
             <p>Posted on: {new Date(post.createdAt).toLocaleDateString()}</p>
             {post.images.length > 0 && (
               <div className="post-images">

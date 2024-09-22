@@ -1,11 +1,11 @@
 import express from 'express';
 import {  addPost, getUserPosts, editPost, deletePost, getAllPosts } from '../controllers/forum.controller.js';
 import { verifyJWT } from "../middlewares/userauth.middleware.js";
-
+import { upload } from "../middlewares/multer.middleware.js";
 const router = express.Router();
 
 // Route to add a post (requires login)
-router.post('/add', verifyJWT, addPost);
+router.post('/add', upload.array('images'), verifyJWT, addPost);
 
 // Route to get all posts by the logged-in user (requires login)
 router.get('/my-posts', verifyJWT, getUserPosts);

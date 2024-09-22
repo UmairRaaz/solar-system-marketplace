@@ -7,10 +7,8 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 // Add a post
 const addPost = asyncHandler(async (req, res) => {
     const { content } = req.body; 
-    const images = req.files ? req.files.map(file => file.path) : []; // Access images from req.files
+    const images = req.files ? req.files.map(file => file.path) : []; 
 
-    console.log(req.body.content); // Should show the content
-    console.log(images); // Should show the array of image paths
 
     if (!content) {
         throw new ApiError(400, "Content is required.");
@@ -87,7 +85,7 @@ const deletePost = asyncHandler(async (req, res) => {
 // Show all posts (public)
 const getAllPosts = asyncHandler(async (req, res) => {
     const posts = await Post.find()
-        .populate('uploadByUserId', 'name')  // Populate uploader's name
+        .populate('uploadByUserId', 'fullName')  // Populate uploader's name
         .sort({ createdAt: -1 });  // Sort by most recent
 
     return res.status(200).json(new ApiResponse(200, posts, "All posts fetched successfully."));
