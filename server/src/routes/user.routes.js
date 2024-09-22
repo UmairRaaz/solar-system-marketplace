@@ -15,7 +15,7 @@ router.route("/user/logout").get(verifyJWT, logOutUser)
 
 
 router.route("/user").get(verifyJWT, getUser)
-router.route("/user/edituser").get(verifyJWT, editUser)
+router.route("/user/edituser").put(verifyJWT, upload.single("image"), editUser)
 // router.route("/user/admin/logout").get(verifyJWT, logOutUser)
 
 

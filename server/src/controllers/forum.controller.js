@@ -2,13 +2,21 @@ import { Post } from '../models/post.models.js';
 import { ApiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { uploadOnCloudinary } from '../utils/cloudinary.js';
 
 
 // Add a post
 const addPost = asyncHandler(async (req, res) => {
-    const { content } = req.body; 
-    const images = req.files ? req.files.map(file => file.path) : []; 
+    const { content } = req.body;
+    let imagesArray = [];
 
+    // If there are images, upload each to Cloudinary and store the URLs in imagesArray
+    if (req.files && req.files.length > 0) {
+        const uploadPromises = req.files.map(file => uploadOnCloudinary(file.path));
+        const uploadedImages = await Promise.all(uploadPromises);
+
+        imagesArray = uploadedImages.map(image => image.secure_url); // Collect Cloudinary secure URLs
+    }
 
     if (!content) {
         throw new ApiError(400, "Content is required.");
@@ -19,13 +27,14 @@ const addPost = asyncHandler(async (req, res) => {
     const newPost = new Post({
         uploadByUserId,
         content,
-        images: images || []
+        images: imagesArray,  // Store the Cloudinary URLs here
     });
 
     await newPost.save();
 
     return res.status(201).json(new ApiResponse(201, { post: newPost }, "Post created successfully."));
 });
+
 
 // Get all posts by logged-in user
 const getUserPosts = asyncHandler(async (req, res) => {
@@ -76,9 +85,7 @@ const deletePost = asyncHandler(async (req, res) => {
     if (post.uploadByUserId.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "You are not allowed to delete this post.");
     }
-
-    await post.remove();
-
+    const deletedPost = await Post.findByIdAndDelete(postId)
     return res.status(200).json(new ApiResponse(200, null, "Post deleted successfully."));
 });
 

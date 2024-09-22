@@ -16,6 +16,9 @@ const SellerDashboard = () => {
                             <li>
                                 <Link to="view-products" className="hover:text-blue-400">View Products</Link>
                             </li>
+                            <li>
+                                <Link to="view-all-posts" className="hover:text-blue-400">View Posts</Link>
+                            </li>
                         </ul>
                     </li>
                 </ul>

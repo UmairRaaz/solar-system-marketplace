@@ -19,6 +19,7 @@ import AddProduct from './pages/seller-dashobard/AddProduct.jsx';
 import ViewProducts from './pages/seller-dashobard/ViewProducts.jsx';
 import SellerDashboard from './pages/seller-dashobard/SellerDashboard.jsx';
 import AllForums from './pages/forums/AllForums.jsx';
+import UserPosts from './pages/user/UserPosts.jsx';
 
 
 const router = createBrowserRouter(
@@ -27,7 +28,7 @@ const router = createBrowserRouter(
       <Route path='/home' element={<Home />} />
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
-      <Route path='/userProfile' element={<UserProfile />} />
+      <Route path='/userprofile' element={<UserProfile />} />
 
       {/* Admin Routes */}
       <Route path='/admin/register' element={<AdminRegister />} />
@@ -36,6 +37,7 @@ const router = createBrowserRouter(
       <Route path='/seller/dashboard' element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>}>
         <Route path='add-product' element={<AddProduct />} />
         <Route path='view-products' element={<ViewProducts />} />
+        <Route path='view-all-posts' element={<UserPosts />} />
       </Route>
 
       <Route path='/all-forums' element={<AllForums />} />

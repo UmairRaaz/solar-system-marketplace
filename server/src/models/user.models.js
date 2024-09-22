@@ -25,8 +25,21 @@ const userSchema = new Schema({
         index: true,
     },
     image: { type: String },
-    addressRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Address' },
-    phoneNumber: { type: String },
+    addressRef: {
+        street: { type: String },
+        area: { type: String },
+        city: { type: String },
+        province: { type: String },
+    },
+    phoneNumber: {
+        type: String,
+        validate: {
+            validator: function (v) {
+                return /^(\+92|03)[0-9]{9}$/.test(v);
+            },
+            message: props => `${props.value} is not a valid phone number! Only Pakistani numbers are allowed.`
+        }
+    },
     role: { type: String, enum: ['user', 'seller', 'admin'], required: true, default: 'user' },
     paymentRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment' },
     password: {

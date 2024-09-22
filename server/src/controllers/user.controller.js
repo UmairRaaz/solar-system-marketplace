@@ -298,37 +298,46 @@ const logOutUser = asyncHandler(async (req, res) => {
 
 // Controller for editing user details
 const editUser = asyncHandler(async (req, res) => {
-    const userId = req.user._id; 
-    const { userName, email, fullName, phoneNumber } = req.body;
+    const userId = req.user._id;
 
-    // Validate required fields
-    if (!userName || !email || !fullName) {
-        throw new ApiError(400, "User name, email, and full name are required");
+
+    // Initialize updatedData object
+    const updatedData = {};
+
+    // Validate required fields and build updatedData
+    // const requiredFields = ['userName', 'email', 'fullName'];
+    const requiredFields = ['fullName'];
+    for (const field of requiredFields) {
+        if (!req.body[field]) {
+            throw new ApiError(400, `${field} is required`);
+        }
+        // Add to updatedData with proper formatting
+        updatedData[field] = req.body[field].toLowerCase();
+    }
+
+    // Add optional fields
+    const optionalFields = ['phoneNumber', 'addressRef'];
+    for (const field of optionalFields) {
+        if (req.body[field] !== undefined) {
+            updatedData[field] = req.body[field];
+        }
     }
 
     // Check if email or username already exists
     const existingUser = await User.findOne({ 
-        $or: [{ email }, { userName: userName.toLowerCase() }], 
-        _id: { $ne: userId } // Exclude current user ID from check
+        $or: [{ email: updatedData.email }, { userName: updatedData.userName }], 
+        _id: { $ne: userId } 
     });
 
     if (existingUser) {
         throw new ApiError(400, "Email or username already in use");
     }
 
-    // Prepare update data
-    const updatedData = {
-        userName: userName.toLowerCase(),
-        email: email.toLowerCase(),
-        fullName,
-        phoneNumber,
-    };
-
     // Handle image upload if provided
     if (req.file) {
         try {
             const imageOnCloudinary = await uploadOnCloudinary(req.file.path);
-            updatedData.image = imageOnCloudinary.secure_url;
+            updatedData.image = imageOnCloudinary.secure_url; 
         } catch (error) {
             throw new ApiError(500, 'Error uploading image to Cloudinary');
         }
@@ -346,7 +355,11 @@ const editUser = asyncHandler(async (req, res) => {
         data: updatedUser,
         message: "User details updated successfully",
     });
+
 });
+
+
+
 
 
 const getUser = asyncHandler(async (req, res) => {
