@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 
@@ -6,6 +6,18 @@ const Register = () => {
 
   const navigate = useNavigate()
 
+  const handleNavigate = () => {
+    navigate('/login')
+  }
+
+  useEffect( () => {
+    const user = JSON.parse(localStorage.getItem('user'))
+    if(user){
+        navigate('/home')
+    }
+    console.log(user)
+
+},[] )
 
   const [formData, setFormData] = useState({
     userName: '',
@@ -137,6 +149,9 @@ const Register = () => {
           >
             Register
           </button>
+          <div>
+            <span>Already have an account?</span> <button onClick={handleNavigate} className='text-blue-800'>Login</button>
+          </div>
 
           {error && <p className="text-red-500 mt-2">{error}</p>}
           {success && <p className="text-green-500 mt-2">{success}</p>}

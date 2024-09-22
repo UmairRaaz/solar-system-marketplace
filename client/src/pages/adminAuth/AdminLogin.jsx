@@ -1,35 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+
+import { Link, useNavigate } from 'react-router-dom';
+
+import { useDispatch } from 'react-redux';
 import { setUser } from "../../redux/authSlice.js"
 
-const Login = () => {
+const AdminLogin = () => {
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    
+
     useEffect( () => {
         const user = JSON.parse(localStorage.getItem('user'))
         if(user){
             navigate('/home')
         }
-        console.log(user)
-
+        // console.log(user)
     },[] )
-
-    const handleNavigate = () => {
-        navigate('/register')
-    }
- 
-
- 
 
     // State to hold form data
     const [formData, setFormData] = useState({
-        userName: '',
         email: '',
         password: '',
-        role: 'user',  // Default role
+        confirmPassword: ''
     });
 
     // State for handling response or errors
@@ -42,15 +36,29 @@ const Login = () => {
           ...formData,
           [e.target.name]: e.target.value,
         });
-    };
+      };
 
     // Handle form submit
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if(formData.password !== formData.confirmPassword){
+            setError("Both Passwords are different")
+            return
+        }
         try {
             // Send login request to the server
-            const response = await axios.post('/api/v1/users/login', formData);
-     
+            const response = await axios.post('/api/v1/users/admin/login', formData);
+            console.log("Response", response);
+    
+            // if (response.data.success) {
+            //     console.log('hi')
+            //     dispatch(setUser(response.data.data.user)); 
+            //     setResponseMessage("Login successful! Redirecting...");
+            //     setError(""); 
+            //     navigate('/home');
+            //     localStorage.setItem("userInfo", JSON.stringify(response.data.data.user))
+            // }
             if (response.data.success) {
                 const userData = response.data.data.user;
                 const token = response.data.data.accessToken; 
@@ -89,27 +97,12 @@ const Login = () => {
             setResponseMessage('');
         }
     };
-
+    
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
             <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
-                <h1 className="text-2xl font-bold text-center mb-6 text-gray-900">User Login</h1>
+                <h1 className="text-2xl font-bold text-center mb-6 text-gray-900">Admin Login</h1>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Username Input */}
-                    <div>
-                        <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
-                        <input
-                            type="text"
-                            name="userName"
-                            id="userName"
-                            value={formData.userName}
-                            onChange={handleInputChange}
-                            className="mt-1 p-2 w-full border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Enter your username"
-                            required
-                        />
-                    </div>
-
                     {/* Email Input */}
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
@@ -139,22 +132,19 @@ const Login = () => {
                             required
                         />
                     </div>
-
-                    {/* Role Selection */}
                     <div>
-                        <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role</label>
-                        <select
-                            name="role"
-                            id="role"
-                            value={formData.role}
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                        <input
+                            type="password"
+                            name="confirmPassword"
+                            id="confirmPassword"
+                            value={formData.confirmPassword}
                             onChange={handleInputChange}
                             className="mt-1 p-2 w-full border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            <option value="user">User</option>
-                            <option value="seller">Seller</option>
-                        </select>
+                            placeholder="Confirm Password"
+                            required
+                        />
                     </div>
-
                     {/* Submit Button */}
                     <div>
                         <button
@@ -164,10 +154,10 @@ const Login = () => {
                             Login
                         </button>
                     </div>
-
                     <div>
-                        <span>Don't have an account?</span> <button onClick={handleNavigate} className='text-blue-700'>Sign In</button>
+                        <span>Don't have an account! <Link to='/admin/register' className='text-blue-800'>Sign Up</Link></span>
                     </div>
+
                     {/* Response Message */}
                     {responseMessage && <p className="text-green-500 mt-2">{responseMessage}</p>}
                     {error && <p className="text-red-500 mt-2">{error}</p>}
@@ -177,4 +167,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default AdminLogin;

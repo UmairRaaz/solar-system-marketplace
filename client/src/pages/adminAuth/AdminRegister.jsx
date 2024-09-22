@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const AdminRegister = () => {
@@ -10,6 +10,14 @@ const AdminRegister = () => {
         fullName: '',
         password: '',
     });
+
+    useEffect( () => {
+        const user = JSON.parse(localStorage.getItem('user'))
+        if(user){
+            navigate('/home')
+        }
+        // console.log(user)
+    },[] )
 
     // State for handling response or errors
     const [responseMessage, setResponseMessage] = useState('');
