@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AddProduct = () => {
+
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -57,6 +60,8 @@ const AddProduct = () => {
         price: "",
       });
       setImages([]); // Clear the image selection
+      navigate('/seller/dashboard/view-products')
+  
     } catch (err) {
       setError(
         err.response ? err.response.data.message : "Something went wrong"
