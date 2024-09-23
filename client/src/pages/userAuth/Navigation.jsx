@@ -19,17 +19,6 @@ const Navbar = () => {
     navigate('/userprofile');
   };
 
-  const handleLogout = async () => {
-    try {
-      const response = await axios.get('/api/v1/users/user/logout');
-      if (response.data.success) {
-        dispatch(setUser(null));  
-        navigate('/login');     
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
 
   return (
     <nav className="bg-gray-800">
@@ -91,7 +80,7 @@ const Navbar = () => {
                       onClick={() => setLogoutOpen(!logoutOpen)}
                       className="w-10 h-10 cursor-pointer border rounded-full bg-white border-gray-500 flex justify-center items-center"
                     >
-                      <span className="text-gray-700">{user.userName.charAt(0).toUpperCase()}</span>
+                      <span className="text-gray-700">{user?.userName?.charAt(0).toUpperCase()}</span>
                     </div>
 
                     {logoutOpen && (
