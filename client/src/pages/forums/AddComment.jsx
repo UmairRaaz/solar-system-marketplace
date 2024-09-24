@@ -8,15 +8,18 @@ const AddComment = ({ postId }) => {
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post(`/api/v1/forums/${postId}/comments`, { content: comment });
-      if (response.data.success) {
+    console.log("post id in addComment frontend", typeof(postId))
+    console.log("comment content in hadleCommentSubmit", comment)
+    
+      await axios.post(`/api/v1/commentlike/${postId}/comment`, { content: comment })
+      .then((response)=> {
+        alert('comment added successfully')
         setComment(''); // Clear the comment input
-        // Optionally, you can dispatch an action to update comments in the Redux store or refetch posts
-      }
-    } catch (error) {
+      })
+
+    .catch ((error) => {
       console.error("Error adding comment", error);
-    }
+    })
   };
 
   return (

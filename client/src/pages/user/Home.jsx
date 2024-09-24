@@ -25,13 +25,13 @@ const Home = () => {
     }
 
     return (
-        <div>
+        <div className='flex flex-col items-center mt-4'>
             <h2 className="text-2xl font-bold mb-6">All Products</h2>
             {error && <p className="text-red-500">{error}</p>} {/* Error message */}
             <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.length ? (
                     products.map(product => (
-                        <li key={product._id} className="mb-4 p-4 border rounded shadow">
+                        <li key={product._id} className="mb-4 p-4 w-80 border rounded shadow">
                             <img
                                 src={product.images[0]} // Display the first image
                                 alt={product.name}
