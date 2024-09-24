@@ -35,6 +35,27 @@ const addPost = asyncHandler(async (req, res) => {
     return res.status(201).json(new ApiResponse(201, { post: newPost }, "Post created successfully."));
 });
 
+// Controller to fetch a post by postId ----------------------- h
+const getPostById = asyncHandler(async (req, res) => {
+    const { postId } = req.params; // Extract postId from URL params
+  
+    // Fetch the post and populate the user information who uploaded the post
+    const post = await Post.findById(postId).populate('uploadByUserId', 'name email');
+  
+    // If the post is not found, throw a 404 error
+    if (!post) {
+      throw new ApiError(404, "Post not found.");
+    }
+  
+    // Check if the logged-in user is the owner of the post
+    if (post.uploadByUserId._id.toString() !== req.user._id.toString()) {
+      throw new ApiError(403, "You are not authorized to edit this post.");
+    }
+  
+    // Return the post data in the response if the user is authorized
+    res.status(200).json(new ApiResponse(200, post, "Post fetched successfully."));
+  });
+  
 
 // Get all posts by logged-in user
 const getUserPosts = asyncHandler(async (req, res) => {
@@ -48,7 +69,8 @@ const getUserPosts = asyncHandler(async (req, res) => {
 
 const editPost = asyncHandler(async (req, res) => {
     const { postId } = req.params;
-    const { content, images } = req.body;
+    // const { content, images } = req.body;
+    console.log("images in editpost route", images)
 
     const post = await Post.findById(postId);
 
@@ -69,6 +91,8 @@ const editPost = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, { post }, "Post updated successfully."));
 });
+
+
 
 // Delete a post (only owner can delete)
 
@@ -98,5 +122,5 @@ const getAllPosts = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, posts, "All posts fetched successfully."));
 });
 
-export { addPost, getUserPosts, editPost, deletePost,  getAllPosts};
+export { addPost, getUserPosts, editPost, deletePost,  getAllPosts, getPostById};
 

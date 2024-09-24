@@ -22,6 +22,7 @@ import SellerDashboard from './pages/seller-dashobard/SellerDashboard.jsx';
 import AllForums from './pages/forums/AllForums.jsx';
 import UserPosts from './pages/user/UserPosts.jsx';
 import EditProduct from './pages/seller-dashobard/EditProduct.jsx';
+import EditForum from './pages/forums/EditForum.jsx';
 
 
 const router = createBrowserRouter(
@@ -47,6 +48,7 @@ const router = createBrowserRouter(
       </Route>
 
       <Route path='/all-forums' element={<AllForums />} />
+      <Route path='/all-forums/forum/edit/:postId' element={<EditForum />} />
     </Route>
   )
 );
